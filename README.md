@@ -1,8 +1,8 @@
 # The Boundness Method - documentation, catalogs of bound systems, and code
-This repository contains code to test for gravitational boundness and calculate virialization state metrics for bound systems, as well as catalogs of bound systems for RESOLVE, ECO, and mock catalogs and documentation on the boundness method and virialization state metrics used.
 
-The boundness method can be used to identify systems of galaxies containing multiple "settled" groups that share a common dark matter halo. Bound systems include "Local Group analogues" that are similar to our own galaxy group, as well as low-mass proto-groups that are in early formation stages. 
+Most galaxy group finders identify "settled" groups that share a single dark matter halo and miss groups like our own Local Group that are gravitationally bound but do not yet share a common halo. The boundness method identifies bound multi-group systems consisting of multiple settled groups that are gravitationally bound. The boundness method allows us to identify "proto-groups"  in the early formation stages, as well as "Local Group analogues" that are similar to our own galaxy group. Identifying bound multi-group systems enables comparisons between groups in different formation stages and allows us to study  groups like our own are in the Universe.  
 
+This repository contains code to test for gravitational boundness and calculate virialization state metrics for bound systems, as well as  documentation on the boundness method and virialization state metrics used.
 
 # Using Catalogs of Bound Systems
 <details>
@@ -12,25 +12,24 @@ The boundness method can be used to identify systems of galaxies containing mult
   * `bound`: 1/0 flag for whether a galaxy is a member of a bound multi-group systems.
   * `lga`: 1/0 flag for whether a galaxy is a member of a Local Group analogue
   * `grp_bound`: Group ID for bound system. If `bound = 0`, `grp_bound` and settled group ID `grp` match. If `bound = 1`, `grp_bound` is a unique ID for the bound mutli-group system.
-  * `R337`: Virial radius of settled (FoF) group. 
+  * `R337`: Virial radius of settled group. 
   
     R<sub>337</sub> = (3 * 10<sup>logmh</sup>/4&pi; &Delta;<sub>mean</sub> &Omega;<sub>m</sub> &rho;<sub>crit</sub>)<sup>1/3</sup>
   
     Calculated using h=0.7, &Delta;<sub>mean</sub>=337, &rho;<sub>crit</sub> = 2.787e11 h<sup>2</sup> Msun/Mpc<sup>3</sup> and &Omega;<sub>m</sub> = 0.3075.
   
- For all attributes below, the quantity listed applies to the settled FoF group if `bound` = 0. If `bound` = 1 the quantity applies to the bound multi-group system.
+ For all attributes below, the quantity listed applies to the settled group if `bound` = 0. If `bound` = 1 the quantity applies to the bound multi-group system.
   * `grpn_bound`: Number of galaxies in bound system.
   * `logmh337_bound`: Summed total of all halo masses in a bound system, using a halo mass convention of 337 times the background density.
-  * `R337_bound`: R337 calculated using `logmh337_bound`. Note that this doesn't represent the radius of a bound multi-group system, but rather the radius of a halo containing all of the mass in the bound multi-group system. 
   * `Rproj_bound`: Projected radius of bound system, calculated using method from Eckert+2017
   * `ad_alpha`: Alpha value obtained from Anderson-Darling test for bound systems with more than five members (`ad_alpha` = 0 if N<6). A higher `ad_alpha` means the system is more virialized. 
-  * `t_cross` (Gyr): System crossing time for bound systems with more than one member (`t_cross` = 0 if N=1). Systems with shorter crossing times are more virialized.
-  * `grp_loggascontent`: Log of group integrated gas-to-stellar mass ratio.
+  * `t_cross` (Gyr): System crossing time for bound systems with more than one member (`t_cross` = 0 if N=1). We calculate crossing time following Firth+2006 as the average projected distance of group members from the group's coordinate center divided by the average velocity of group members. Systems with shorter crossing times are more virialized.
+  * `grp_loggascontent`: Log of group integrated gas-to-stellar mass ratio. We use the `logmgas` column in RESOLVE and ECO for gas masses. 
   * `ur_colorgap`: Difference in u-r color between group central (galaxy with brightest r-magnitude) and brightest satellite, as in Eckert+2017             </details>
   
 # Testing for Gravitational Boundness between two Settled Groups
   <details>
-  We calculate whether two settled groups are gravitatinally bound by comparing the relative velocity between the two groups to the escape velocity from one group at the location of the other group. If the relative velocity is smaller than the escape velocity, then the groups are bound. 
+  We calculate whether two settled groups are gravitationally bound by comparing the relative velocity between the two groups to the escape velocity from one group at the location of the other group. If the relative velocity is smaller than the escape velocity, then the groups are bound. 
     
     
   
@@ -58,7 +57,7 @@ The boundness method can be used to identify systems of galaxies containing mult
 ![forgithub_vgrpgrpdist](https://user-images.githubusercontent.com/46827591/123893005-d6bbb380-d918-11eb-88eb-ee9a9d294ffa.png)
 
       
-When testing whether a pair of groups in RESOLVE or ECO are bound, we multiply the calculated v<sub>grp-grp (LOS)</sub> for that pair of groups by the v<sub>grp-grp (3D)</sub> / v<sub>grp-grp (LOS)</sub> distribution and use the resulting distribution of possible v<sub>grp-grp (3D)</sub> for that pair lof groups to calculate a probability of boundness, as described below. 
+When testing whether a pair of groups in RESOLVE or ECO are bound, we multiply the calculated v<sub>grp-grp (LOS)</sub> for that pair of groups by the v<sub>grp-grp (3D)</sub> / v<sub>grp-grp (LOS)</sub> distribution and use the resulting distribution of possible v<sub>grp-grp (3D)</sub> for that pair of groups to calculate a probability of boundness, as described below. 
     </details>
     
   **Calculating Probability of Boundness**
@@ -102,11 +101,11 @@ When testing whether a pair of groups in RESOLVE or ECO are bound, we multiply t
     
 # Identifying Local Group Analogues in a Catalog of Bound Multi-group Systems
   <details>
-    Local Group (LG) analogues are a subset of bound multi-group systems. Each contains two giant galaxies, analogues for the Milky Way (MW) and Andromeda (M31), and their satellites identified by FoF. To qualify as a LG analogue, a bound multi-group system must satisfy the following constraints:
+    To identify galaxy group slike our own, we identify Local Group (LG) analogues that are a subset of bound multi-group systems. Each contains two giant galaxies, analogues for the Milky Way (MW) and Andromeda (M31), and their satellites identified by the settled group finder. To qualify as a LG analogue, a bound multi-group system must satisfy the following constraints:
     
-  * Mass constraint (following Carlesi et al., 2019): the FoF groups containing the MW and M31 analogues must each have a halo mass of at lease 5x10<sup>11</sup>/h, and the two groups must have a combined halo mass of no more than 5x10<sup>12</sup>/h. The halo mass of the M31 analogue must be no more than 3 times greater than the halo mass of the MW analogue. 
+  * Mass constraint (following Carlesi et al., 2019): the settled groups containing the MW and M31 analogues must each have a halo mass of at least 5x10<sup>11</sup>/h, and the two groups must have a combined halo mass of no more than 5x10<sup>12</sup>/h. The halo mass of the M31 analogue must be no more than 3 times greater than the halo mass of the MW analogue. 
   * The MW and M31 analogues must be separated by between 0.35-1.25 Mpc/h. We use our method for correcting for projection effects (see above) to estimate the 3D distance between galaxies, taking the distance between galaxies to be the median of the distribution of possible R<sub>grp-grp (3D)</sub> values. 
-  * The FoF groups containing the MW and M31 analogues must be gravitationally bound.
-  * To ensure that the MW and M31 analogues are isolated from nearby large groups, the FoF groups containing the MW and M31 analogues must not be bound to any other groups with halo mass above the gas-richness threshhold scale of 10<sup>11.5</sup> M<sub>sun</sub>.
+  * The settled groups containing the MW and M31 analogues must be gravitationally bound.
+  * To ensure that the MW and M31 analogues are isolated from nearby large groups, the settled groups containing the MW and M31 analogues must not be bound to any other groups with halo mass above the gas-richness threshhold scale of 10<sup>11.5</sup> M<sub>sun</sub>.
   </details>
 
