@@ -1,4 +1,4 @@
-# The Boundness Method - documentation, catalogs of bound systems, and code
+# The Boundness Method - documentation and code
 
 Most galaxy group finders identify "settled" groups that share a single dark matter halo and miss groups like our own Local Group that are gravitationally bound but do not yet share a common halo. The boundness method identifies bound multi-group systems consisting of multiple settled groups that are gravitationally bound. The boundness method allows us to identify "proto-groups"  in the early formation stages, as well as "Local Group analogues" that are similar to our own galaxy group. Identifying bound multi-group systems enables comparisons between groups in different formation stages and allows us to study  groups like our own are in the Universe.  
 
@@ -46,15 +46,16 @@ This repository contains code to test for gravitational boundness and calculate 
       
   We create a distribution of R<sub>grp-grp (3D)</sub> / R<sub>grp-grp (2D)</sub> for every pair of nearest neighbor groups in the mocks. When testing for boundness in RESOLVE or ECO, we multiply the distribution of R<sub>grp-grp (3D)</sub> / R<sub>grp-grp (2D)</sub> from the mocks by the calculated R<sub>grp-grp (2D)</sub> for the pair of groups we're testing in RESOVLE or ECO, creating a distribution of possible R<sub>grp-grp (3D)</sub> values for that pair of groups. We use this distribution to calculate a probability of boundess, as described below. 
       
-![forgithub_rgrpgrpdist](https://user-images.githubusercontent.com/46827591/123892771-70cf2c00-d918-11eb-86b5-c5550bf0f77f.png)
-    </details>
+<img width="397" alt="forgithub_rgrpgrp" src="https://user-images.githubusercontent.com/46827591/124322644-0c40e680-db3d-11eb-9ee3-12b8f52c9f52.png">
+
+  </details>
     
   **Calculating Relative Velocity between Groups**
     <details>
       We calculate the relative velocity between a chosen settled group and its neighbor group along the line-of-sight,
       v<sub>grp-grp (LOS)</sub> = |cz<sub>LOS, chosen group</sub>| - |cz<sub>LOS, neighbor group</sub>|. To approximate the 3D relative velocity between groups, we correct for projection effects using a similar method as described above for the escape velocity. For each pair of nearest neighbor groups in the mocks, we calculate v<sub>grp-grp (LOS)</sub>. We use the 3D velocity componenets for each galaxy in the mocks to calculate the 3D velocity of each settled group, and then calculate the relative 3D velocity between nearest neigbhbor groups. We create a distribution of v<sub>grp-grp (3D)</sub> / v<sub>grp-grp (LOS)</sub>. 
       
-![forgithub_vgrpgrpdist](https://user-images.githubusercontent.com/46827591/123893005-d6bbb380-d918-11eb-88eb-ee9a9d294ffa.png)
+<img width="374" alt="forgithub_vgrpgrp" src="https://user-images.githubusercontent.com/46827591/124322719-31355980-db3d-11eb-9131-f1371ebfe041.png">
 
       
 When testing whether a pair of groups in RESOLVE or ECO are bound, we multiply the calculated v<sub>grp-grp (LOS)</sub> for that pair of groups by the v<sub>grp-grp (3D)</sub> / v<sub>grp-grp (LOS)</sub> distribution and use the resulting distribution of possible v<sub>grp-grp (3D)</sub> for that pair of groups to calculate a probability of boundness, as described below. 
