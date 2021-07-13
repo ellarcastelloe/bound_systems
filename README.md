@@ -25,7 +25,7 @@ This repository contains code to test for gravitational boundness and calculate 
   * `ad_alpha`: Alpha value obtained from Anderson-Darling test for bound systems with more than five members (`ad_alpha` = 0 if N<6). A higher `ad_alpha` means the system is more virialized. 
   * `t_cross` (Gyr): System crossing time for bound systems with more than one member (`t_cross` = 0 if N=1). We calculate crossing time following Firth+2006 as the average projected distance of group members from the group's coordinate center divided by the average velocity of group members. Systems with shorter crossing times are more virialized.
   * `grp_loggascontent`: Log of group integrated gas-to-stellar mass ratio. We use the `logmgas` column in RESOLVE and ECO for gas masses. 
-  * `ur_colorgap`: Difference in u-r color between group central (galaxy with brightest r-magnitude) and brightest satellite, as in Eckert+2017             </details>
+  * `ur_colorgap`: Difference in u-r color between group central (galaxy with brightest r-magnitude) and brightest satellite, as in Eckert+2017             
 
   For the mock catalogs, the above columns contain information for bound multi-group systems identified with projected data in the mocks using projection effect corrections (see section on testing for gravitational boundness between two settled groups below). There are also columns that have the same name  with `3d` on the end -- these columns contain information for "true" bound multi-group systems that were identified using 3D data in the mocks.  
   </details>
