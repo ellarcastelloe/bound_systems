@@ -27,7 +27,7 @@ This repository contains code to test for gravitational boundness and calculate 
   * `grp_loggascontent`: Log of group integrated gas-to-stellar mass ratio. We use the `logmgas` column in RESOLVE and ECO for gas masses. 
   * `ur_colorgap`: Difference in u-r color between group central (galaxy with brightest r-magnitude) and brightest satellite, as in Eckert+2017             </details>
 
-For the mock catalogs, the above columns contain information for bound multi-group systems identified with projected data in the mocks using projection effect corrections (see section on testing for gravitational boundness between two settled groups below). There are also columns that have the same name  with `3d` on the end -- these columns contain information for "true" bound multi-group systems that were identified using 3D data in the mocks.  
+  For the mock catalogs, the above columns contain information for bound multi-group systems identified with projected data in the mocks using projection effect corrections (see section on testing for gravitational boundness between two settled groups below). There are also columns that have the same name  with `3d` on the end -- these columns contain information for "true" bound multi-group systems that were identified using 3D data in the mocks.  
   
 # Testing for Gravitational Boundness between two Settled Groups
   <details>
