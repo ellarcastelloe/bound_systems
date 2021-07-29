@@ -11,23 +11,23 @@ This repository contains code to test for gravitational boundness and calculate 
   
   * `boundFlag`: 1/0 flag for whether a galaxy is a member of a bound multi-group systems.
   * `lga`: 1/0 flag for whether a galaxy is a member of a Local Group analogue
-  * `boundID`: Group ID for bound system. If `bound = 0`, `grp_bound` and settled group ID `grp` match. If `bound = 1`, `grp_bound` is a unique ID for the bound mutli-group system.
+  * `boundID`: Group ID for bound system. If `boundFlag = 0`, `boundID` and settled group ID `grp` match. If `boundFlag = 1`, `boundID` is a unique ID for the bound mutli-group system.
   * `grpR337`: Virial radius of settled group. 
   
     R<sub>337</sub> = (3 * 10<sup>logmh</sup>/4&pi; &Delta;<sub>mean</sub> &Omega;<sub>m</sub> &rho;<sub>crit</sub>)<sup>1/3</sup>
   
     Calculated using h=0.7, &Delta;<sub>mean</sub>=337, &rho;<sub>crit</sub> = 2.787e11 h<sup>2</sup> Msun/Mpc<sup>3</sup> and &Omega;<sub>m</sub> = 0.3075.
   
- For all attributes below, the quantity listed applies to the settled group if `bound` = 0. If `bound` = 1 the quantity applies to the bound multi-group system.
+ For all attributes below, the quantity listed applies to the settled group if `boundFlag` = 0. If `boundFlag` = 1 the quantity applies to the bound multi-group system.
   * `boundN`: Number of galaxies in bound system.
   * `boundLog337`: Summed total of all halo masses in a bound system, using a halo mass convention of 337 times the background density.
   * `boundRproj`: Projected radius of bound system, calculated using method from Eckert+2017
-  * `boundADalpha`: Alpha value obtained from Anderson-Darling test for bound systems with more than five members (`ad_alpha` = 0 if N<6). A higher `ad_alpha` means the system is more virialized. 
-  * `boundTCross` (Gyr): System crossing time for bound systems with more than one member (`t_cross` = 0 if N=1). We calculate crossing time following Firth+2006 as the average projected distance of group members from the group's coordinate center divided by the average velocity of group members. Systems with shorter crossing times are more virialized.
+  * `boundADalpha`: Alpha value obtained from Anderson-Darling test for bound systems with more than five members (`boundADalpha` = 0 if N<6). A higher `boundADalpha` means a system is more virialized. 
+  * `boundTCross` (Gyr): System crossing time for bound systems with more than one member (`boundTCross` = 0 if N=1). We calculate crossing time following Firth+2006 as the average projected distance of group members from the group's coordinate center divided by the average velocity of group members. Systems with shorter crossing times are more virialized.
   * `boundLogG`: Log of group integrated gas mass. We use the `logmgas` column in RESOLVE and ECO for gas masses. 
   * `boundLogS`: Log of group integrated stellar mass
   * `boundURcolorgap`: Difference in u-r color between group central (galaxy with brightest r-magnitude) and brightest satellite, as in Eckert+2017             
-  * `boundDSpval`: p-value from the Dressler & Shectman test for bound systems with more than 10 members (`boundDSpval` = 0 if N<11). A low p-value (p < 0.01) means that there is a high amount of subclustering, suggesting that the bound system is less virialized.
+  * `boundDSpval`: p-value from the Dressler & Shectman test for bound systems with more than 10 members (`boundDSpval` = 0 if N<11). A low p-value means that there is a high amount of subclustering, suggesting that the bound system is less virialized.
   * `boundR337overlap`: 1/0 flag for whether a bound multi-group system contains overlapping R337 of constituent settled groups. If two or more settled groups have overlapping R337 (using projection effect corrections to calculate the distance between group centers and the sum of R337 values for the two groups) then `boundR337overlap` = 1.
 
   For the mock catalogs, the above columns contain information for bound multi-group systems identified with projected data in the mocks using projection effect corrections (see section on testing for gravitational boundness between two settled groups below). There are also columns that have the same name  with `3d` on the end -- these columns contain information for "true" bound multi-group systems that were identified using 3D data in the mocks.  
