@@ -557,3 +557,211 @@ def test_boundness_3d(ra_tars, dec_tars, distobs_tar, czreal_tars, mass_tars, vx
         not_bounded += 1
 
     return bound, ratio, vgrpgrp
+
+def crossing_time(grp):
+    """
+    grp is pandas df of group or bound multi-group system you want crossing time of
+    <r> is the average projected distance of group members from
+    the group centre of mass.
+    <|v|> is the average speed of group members relative to the
+    group centre of mass
+    t_c = <r>/<|v|>
+    """
+    rprojs = []
+    relvs = []
+    try:
+        grpra = np.mean(np.array(grp.radeg))
+        grpdec = np.mean(np.array(grp.dedeg))
+        grpcz = np.mean(np.array(grp.cz))
+    except AttributeError:
+        grpra = np.mean(np.array(grp.ra))
+        grpdec = np.mean(np.array(grp.dec))
+        grpcz = np.mean(np.array(grp.cz))
+    for i in range(len(grp)):
+        thisgal = grp.iloc[i]
+        try:
+            rproj = get_proj_distance(thisgal.radeg, thisgal.dedeg, grpra, grpdec, thisgal.cz, grpcz)
+        except AttributeError:
+            rproj = get_proj_distance(thisgal.ra, thisgal.dec, grpra, grpdec, thisgal.cz, grpcz)
+        rprojs.append(rproj*1e3) #in kpc
+        speed = np.array(grp.cz.iloc[i])
+        relv = np.abs(speed - grpcz)
+        if relv == 0:
+            relv += 0.1
+        relvs.append(relv)
+
+    if np.mean(relvs) > 0:
+        t_c = np.mean(rprojs)/np.mean(relvs)
+        if t_c != None:
+            return t_c # in Gyr, multiply by 1e9 to get in years 
+        elif t_c == None:
+            print('uh oh, none')
+
+def color_gap(grp):
+    if np.array(grp.boundN)[0] > 1:
+        """ gal_urcolor = np.array(grp.modelu_r)
+        colordisp = np.std(gal_urcolor)
+        return colordisp"""
+        print(grp)
+        gal_mags = np.array(grp.absrmag)
+        sort = np.argsort(gal_mags)
+        mags_sort = gal_mags[sort] #sorts from smallest to largest magnitude, meaning brightest to dimmest 
+        brightest_mag = mags_sort[0]
+        second_brightest_mag = mags_sort[1]
+        try:
+            brightest_gal = grp.loc[grp.absrmag == brightest_mag]
+            second_brightest_gal = grp.loc[grp.absrmag == second_brightest_mag]
+        except AttributeError:
+            brightest_gal = grp.loc[grp.M_r == brightest_mag]
+            second_brightest_gal = grp.loc[grp.M_r == second_brightest_mag]
+        try:
+            brightest_ur = np.array(brightest_gal.modelu_r)[0]
+            second_brightest_ur = np.array(second_brightest_gal.modelu_r)[0]
+        except AttributeError:
+            brightest_ur = np.array(brightest_gal.u_r)[0]
+            second_brightest_ur = np.array(second_brightest_gal.u_r)[0]
+        colorgap = brightest_ur - second_brightest_ur
+        return colorgap
+    else:
+        return 0
+
+def AD_test(grp):
+    from scipy.stats import anderson
+    czs = grp.cz
+    czs = np.array(czs)
+    number        = 5            #min number of galaxies in a group
+    n = int(np.shape(czs)[0])
+    if n > number:
+        #put observed redshifts in increasing order for each group
+        sort = np.argsort(czs)
+        czs = czs[sort]
+
+        #do AD test
+        andtest = anderson(czs,dist='norm')
+        A2notstar = andtest[0]
+        A2 = A2notstar*(1 + 0.75/n + 2.25/(n**2))
+
+        a = 3.6789468
+        b = 0.1749916  #from Hou et al 2009
+        alpha = a * np.exp(-A2/b)  #alpha < 5% not gaussian- only 1 galaxy not gaussian
+
+        return alpha
+    else:
+        return 0.
+                                                                       
+def calculate_gas_content(grp):
+    try:
+        gas = 10**np.array(grp.logmgas)
+    except AttributeError:
+        gas = np.array(grp.mhi)
+    gas = np.sum(gas)
+    stars = 10**np.array(grp.logmstar)
+    stars = np.sum(stars)
+    stars = np.log10(stars)
+    gas = np.log10(gas)
+    return gas, stars
+
+from sklearn.cluster import KMeans
+def scrambled(orig):
+    dest = orig[:]
+    np.random.shuffle(dest)
+    return dest
+
+def DS_test(grp):
+    czs = grp.cz
+    try:
+        ras = grp.radeg
+        decs = grp.dedeg
+    except AttributeError:
+        ras = grp.ra
+        decs = grp.dec
+    H0 = 70 #h
+    ras = np.array(ras)
+    decs = np.array(decs)
+    czs = np.array(czs)
+    del_sim = np.array([[0.]*100]*len(czs))
+    delta = [0.] * len(czs)
+    #DELSIM= [0.] * len(czs)
+    #p_valueuntitled2 = [0.] * len(czs)
+    n = int(np.shape(czs)[0])
+    #print(n)
+    size=11
+    if n >= size:
+        #loop through each galaxy in group
+        for j in range(0,len(ras)):
+            angles = np.sqrt(((ras - ras[j])*np.cos((np.pi/180.)*decs[j]))**2 + (decs - decs[j])**2)
+            dists = (np.pi/180.)* angles * czs[j] / H0
+            close = np.argsort(dists)[1:size] #indices of closest galaxies
+            sig = np.sqrt(sum((czs - np.mean(czs))**2)/(n - 1))
+            czs_loc = czs[close]    #czs of closest gals
+            sig_loc = np.sqrt(sum((czs_loc - np.mean(czs_loc))**2)/(n - 1))
+            delta[j] = (size/sig**2) * ((np.mean(czs_loc) - np.mean(czs))**2 + (sig_loc - sig)**2)
+            #simulated values
+            for k in range(0,100):
+                cz_scram = np.array(scrambled(list(czs)))
+                angles  = np.sqrt(((ras - ras[j])*np.cos((np.pi/180.)*decs[j]))**2 + (decs - decs[j])**2)
+                dists = (np.pi/180.)* angles * cz_scram[j] / H0
+                close = np.argsort(dists)[1:size] #indices of closest galaxies
+                sig = np.sqrt(sum((cz_scram - np.mean(cz_scram))**2)/(n - 1))
+                czs_loc = cz_scram[close]    #czs of closest gals
+                sig_loc = np.sqrt(sum((czs_loc - np.mean(czs_loc))**2)/(n - 1))
+                del_sim[j][k] = (size/sig**2) * ((np.mean(czs_loc) - np.mean(czs))**2 + (sig_loc - sig)**2)
+        DELTA = sum(np.sqrt(delta[0:n]))
+        DELSIM = sum(np.sqrt(del_sim[0:n]))
+        p_value = len(np.where(DELSIM > DELTA)[0])/100.
+        return p_value
+
+def r337_overlap(grp1, grp2, h):
+
+    offset = np.log10(h)
+    try:
+        Rvir1 = np.array(grp1.grpR337)[0]
+        Rvir2 = np.array(grp2.grpR337)[0]
+    except IndexError:
+        try:
+            Rvir1 = np.array(grp1.grpR337)
+            Rvir2 = np.array(grp2.grpR337)
+        except AttributeError:
+            try:
+                logmh3371 = np.array(grp1.logmh)[0]
+                logmh3372 = np.array(grp2.logmh)[0]
+            except IndexError:
+                logmh3371 = np.array(grp1.logmh)
+                logmh3372 = np.array(grp2.logmh)
+            Rvir1 = bd.Rvir(logmh3371, h)
+            Rvir2 = bd.Rvir(logmh3372, h)
+    sumrvir = Rvir1 + Rvir2
+
+    try:
+        Rgrpgrp2d = get_proj_distance(grp1.radeg, grp1.dedeg, grp2.radeg, grp2.dedeg, grp1.cz, grp2.cz)
+    except AttributeError:
+        Rgrpgrp2d = get_proj_distance(grp1.radeg, grp1.dedeg, grp2.radeg, grp2.dedeg, grp1.cz_obs, grp2.cz_obs)
+
+    raddist = pd.read_csv('eco_3Ddistanceratios_duplicatesmarked_102220_wlogmh_grpn.csv')
+    raddist = raddist.loc[raddist.duplicate_distance == 'no']
+
+    rads = raddist.R3D_over_Rproj_obs
+
+    d = Rgrpgrp2d * rads
+    meddist = np.median(d)
+
+    if meddist > sumrvir:
+        overlap = 0.
+    else:
+        overlap = 1
+
+    return overlap
+
+def r337overlap_inbdsystem(bdgrp):
+    fofids = np.unique(np.array(bdgrp.grp))
+    overlap = 0.
+    for i in range(len(fofids)):
+        fof1 = bdgrp.loc[bdgrp.grp == fofids[i]]
+        for j in range(len(fofids)):
+            if i != j:
+                fof2 = bdgrp.loc[bdgrp.grp == fofids[j]]
+                overlap = r337_overlap(fof1, fof2, 0.7)
+                if overlap == 1:
+                    return overlap
+    return overlap
+
